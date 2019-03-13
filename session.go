@@ -171,10 +171,11 @@ func (m *milterSession) Process(msg *Message) (Response, error) {
 		// on SMFIC_BODYEOB
 		// Reset state to before SMFIC_MAIL and continue,
 		// unless connection is dropped by MTA
+		resp, err := m.milter.Body(newModifier(m))
 		m.milter.Init()
 
 		// call and return milter handler
-		return m.milter.Body(newModifier(m))
+		return resp, err
 
 	case 'H':
 		// helo command
