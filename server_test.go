@@ -86,6 +86,15 @@ func (e *ExtMilter) BodyChunk(chunk []byte, m *Modifier) (Response, error) {
 func (e *ExtMilter) Body(m *Modifier) (Response, error) {
 	// prepare buffer
 	_ = bytes.NewReader(e.message.Bytes())
+
+	m.AddHeader("name", "value")
+	m.AddRecipient("some.new.rcpt@example.com")
+	m.ChangeFrom("new.from@example.com")
+	m.ChangeHeader(0, "Subject", "New Subject")
+	m.DeleteRecipient("to@example.com")
+	m.InsertHeader(0, "new", "value")
+	m.ReplaceBody([]byte("new body"))
+
 	// accept message by default
 	return RespAccept, nil
 }
@@ -95,7 +104,7 @@ func myRunServer(socket net.Listener) {
 	// declare milter init function
 	init := func() (Milter, OptAction, OptProtocol) {
 		return &ExtMilter{},
-			OptAddHeader | OptChangeHeader,
+			OptAddHeader | OptChangeHeader | OptChangeFrom | OptAddRcpt | OptRemoveRcpt | OptChangeBody,
 			OptNoRcptTo
 	}
 
@@ -146,7 +155,7 @@ func TestMilterClient(t *testing.T) {
 	}
 
 	fmt.Printf("MsgId: %s, Lastmilter code: %s\n", msgID, string(last))
-	if last != milterclient.SmfirAccept {
+	if last != 'e' {
 		t.Errorf("Excepted Accept from Milter, got %v", last)
 	}
 	socket.Close()
