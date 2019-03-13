@@ -1,5 +1,11 @@
-[![GoDoc](https://godoc.org/github.com/phalaaxx/milter?status.svg)](https://godoc.org/github.com/phalaaxx/milter)
+[![GoDoc](https://godoc.org/github.com/mschneider82/milter?status.svg)](https://godoc.org/github.com/mschneider82/milter)
 
 # milter
-A Go library for milter support heavily inspired from https://github.com/andybalholm/milter
-For example how to use the library see https://github.com/phalaaxx/pf-milters - postfix milter for email classification with bogofilter and blacklisting messages which contain files with executable extensions.
+
+This is a fork of github.com/phalaaxx/milter, added the following pull requests:
+
+* https://github.com/phalaaxx/milter/pull/16
+* https://github.com/phalaaxx/milter/pull/14
+* https://github.com/phalaaxx/milter/pull/11
+
+and also _test cases using my [milterclient](https://github.com/mschneider82/milterclient) library.
