@@ -108,6 +108,12 @@ func (m *milterSession) Process(msg *Message) (Response, error) {
 		m.headers = nil
 		m.macros = nil
 		// do not send response
+
+		// on SMFIC_ABORT
+		// Reset state to before SMFIC_MAIL and continue,
+		// unless connection is dropped by MTA
+		m.milter.Init()
+
 		return nil, nil
 
 	case 'B':
@@ -162,6 +168,11 @@ func (m *milterSession) Process(msg *Message) (Response, error) {
 		return nil, nil
 
 	case 'E':
+		// on SMFIC_BODYEOB
+		// Reset state to before SMFIC_MAIL and continue,
+		// unless connection is dropped by MTA
+		m.milter.Init()
+
 		// call and return milter handler
 		return m.milter.Body(newModifier(m))
 
@@ -261,12 +272,6 @@ func (m *milterSession) HandleMilterCommands() {
 				log.Printf("Error writing packet: %v", err)
 				return
 			}
-		}
-		if msg.Code == 'A' || msg.Code == 'E' {
-			// on SMFIC_ABORT or SMFIC_BODYEOB
-			// Reset state to before SMFIC_MAIL and continue,
-			// unless connection is dropped by MTA
-			m.milter.Init()
 		}
 	}
 }
