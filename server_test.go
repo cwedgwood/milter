@@ -4,12 +4,13 @@ import (
 	"bytes"
 	"fmt"
 	"log"
-	"milterclient"
 	"net"
 	"net/textproto"
 	"os"
 	"strings"
 	"testing"
+
+	"github.com/mschneider82/milterclient"
 )
 
 /* ExtMilter object */
