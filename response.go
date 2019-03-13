@@ -57,6 +57,8 @@ func NewResponse(code byte, data []byte) *CustomResponse {
 }
 
 // NewResponseStr generates a new CustomResponse with string payload
+// code should be 'y' SMFIR_REPLYCODE
+// data can be "550 mailbox unavailable"
 func NewResponseStr(code byte, data string) *CustomResponse {
 	return NewResponse(code, []byte(data+null))
 }
