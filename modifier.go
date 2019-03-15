@@ -12,9 +12,8 @@ import (
 // Modifier provides access to Macros, Headers and Body data to callback handlers. It also defines a
 // number of functions that can be used by callback handlers to modify processing of the email message
 type Modifier struct {
-	Macros  map[string]string
-	Headers textproto.MIMEHeader
-
+	Macros      map[string]string
+	Headers     textproto.MIMEHeader
 	writePacket func(*Message) error
 }
 

@@ -7,9 +7,10 @@ import (
 
 // Milter is an interface for milter callback handlers
 type Milter interface {
-	// Init is called on begin of a new Mail (before Connect() and after Body() )
-	// Can be used to Reset session state to before SMFIC_MAIL
-	Init()
+	// Init is called on begin of a new Mail, before Connect() and before MailFrom()
+	// Can be used to Reset session state
+	// On MailFrom mailID is available
+	Init(sessionID, mailID string)
 
 	// Connect is called to provide SMTP connection data for incoming message
 	//   supress with NoConnect
