@@ -51,6 +51,7 @@ type milterSession struct {
 	milter    Milter
 	sessionID string
 	mailID    string
+	logger    Logger
 }
 
 func init() {
@@ -233,7 +234,7 @@ func (m *milterSession) Process(msg *Message) (Response, error) {
 
 	case 'Q':
 		// client requested session close
-		return nil, eCloseSession
+		return nil, ErrCloseSession
 
 	case 'R':
 		// envelope to address
@@ -246,7 +247,7 @@ func (m *milterSession) Process(msg *Message) (Response, error) {
 	default:
 		// print error and close session
 		log.Printf("Unrecognized command code: %c", msg.Code)
-		return nil, eCloseSession
+		return nil, ErrCloseSession
 	}
 
 	// by default continue with next milter message
@@ -269,7 +270,7 @@ func (m *milterSession) HandleMilterCommands() {
 		msg, err := m.ReadPacket()
 		if err != nil {
 			if err != io.EOF {
-				log.Printf("Error reading milter command: %v", err)
+				m.logger.Printf("Error reading milter command: %v", err)
 			}
 			return
 		}
@@ -277,9 +278,9 @@ func (m *milterSession) HandleMilterCommands() {
 		// process command
 		resp, err := m.Process(msg)
 		if err != nil {
-			if err != eCloseSession {
+			if err != ErrCloseSession {
 				// log error condition
-				log.Printf("Error performing milter command: %v", err)
+				m.logger.Printf("Error performing milter command: %v", err)
 			}
 			return
 		}
@@ -288,7 +289,7 @@ func (m *milterSession) HandleMilterCommands() {
 		if resp != nil {
 			// send back response message
 			if err = m.WritePacket(resp.Response()); err != nil {
-				log.Printf("Error writing packet: %v", err)
+				m.logger.Printf("Error writing packet: %v", err)
 				return
 			}
 		}

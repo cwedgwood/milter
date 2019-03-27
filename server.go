@@ -17,10 +17,11 @@ type MilterInit func() (Milter, OptAction, OptProtocol)
 // RunServer provides a convenient way to start a milter server
 // Handlers provide way to handle errors from panics
 // With nil handlers panics not recovered
-func RunServer(server net.Listener, init MilterInit, handlers ...func(error)) error {
+func RunServer(server net.Listener, logger Logger, init MilterInit, handlers ...func(error)) error {
 	defaultServer.Listener = server
 	defaultServer.MilterFactory = init
 	defaultServer.ErrHandlers = handlers
+	defaultServer.Logger = logger
 	return defaultServer.RunServer()
 }
 
@@ -29,17 +30,18 @@ func Close() (err error) {
 	return defaultServer.Close()
 }
 
-// Milter server for handling and processing incoming connections
+// Server Milter for handling and processing incoming connections
 // support panic handling via ErrHandler
 // couple of func(error) could be provided for handling error
 type Server struct {
 	Listener      net.Listener
 	MilterFactory MilterInit
 	ErrHandlers   []func(error)
+	Logger        Logger
 	sync.WaitGroup
 }
 
-// For graceful shutdown
+// Close for graceful shutdown
 // Stop accepting new connections
 // And wait until processing connections ends
 func (s *Server) Close() (err error) {
@@ -50,7 +52,7 @@ func (s *Server) Close() (err error) {
 	return err
 }
 
-// Start milter server via provided listener
+// RunServer starts milter server via provided listener
 func (s *Server) RunServer() error {
 	if s.Listener == nil {
 		return errors.New("no listen addr specified")
@@ -84,6 +86,7 @@ func (s *Server) handleCon(conn net.Conn) {
 		protocol: protocol,
 		sock:     conn,
 		milter:   milter,
+		logger:   s.Logger,
 	}
 	// handle connection commands
 	session.HandleMilterCommands()

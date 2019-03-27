@@ -13,36 +13,36 @@ import (
 	"github.com/mschneider82/milterclient"
 )
 
-/* ExtMilter object */
-type ExtMilter struct {
+/* TestMilter object */
+type TestMilter struct {
 	Milter
 	multipart bool
 	message   *bytes.Buffer
 }
 
-// https://github.com/phalaaxx/milter/blob/master/interface.go
-func (e *ExtMilter) Init() {
+// https://github.com/mschneider82/milter/blob/master/interface.go
+func (e *TestMilter) Init(sid, mid string) {
 	return
 }
 
-func (e *ExtMilter) Disconnect() {
+func (e *TestMilter) Disconnect() {
 	return
 }
 
-func (e *ExtMilter) Connect(name, value string, port uint16, ip net.IP, m *Modifier) (Response, error) {
+func (e *TestMilter) Connect(name, value string, port uint16, ip net.IP, m *Modifier) (Response, error) {
 	return RespContinue, nil
 }
 
-func (e *ExtMilter) MailFrom(name string, m *Modifier) (Response, error) {
+func (e *TestMilter) MailFrom(name string, m *Modifier) (Response, error) {
 	return RespContinue, nil
 }
 
-func (e *ExtMilter) RcptTo(name string, m *Modifier) (Response, error) {
+func (e *TestMilter) RcptTo(name string, m *Modifier) (Response, error) {
 	return RespContinue, nil
 }
 
 /* handle headers one by one */
-func (e *ExtMilter) Header(name, value string, m *Modifier) (Response, error) {
+func (e *TestMilter) Header(name, value string, m *Modifier) (Response, error) {
 	// if message has multiple parts set processing flag to true
 	if name == "Content-Type" && strings.HasPrefix(value, "multipart/") {
 		e.multipart = true
@@ -51,7 +51,7 @@ func (e *ExtMilter) Header(name, value string, m *Modifier) (Response, error) {
 }
 
 /* at end of headers initialize message buffer and add headers to it */
-func (e *ExtMilter) Headers(headers textproto.MIMEHeader, m *Modifier) (Response, error) {
+func (e *TestMilter) Headers(headers textproto.MIMEHeader, m *Modifier) (Response, error) {
 	// return accept if not a multipart message
 	if !e.multipart {
 		return RespAccept, nil
@@ -74,7 +74,7 @@ func (e *ExtMilter) Headers(headers textproto.MIMEHeader, m *Modifier) (Response
 }
 
 // accept body chunk
-func (e *ExtMilter) BodyChunk(chunk []byte, m *Modifier) (Response, error) {
+func (e *TestMilter) BodyChunk(chunk []byte, m *Modifier) (Response, error) {
 	// save chunk to buffer
 	if _, err := e.message.Write(chunk); err != nil {
 		return nil, err
@@ -83,7 +83,7 @@ func (e *ExtMilter) BodyChunk(chunk []byte, m *Modifier) (Response, error) {
 }
 
 /* Body is called when email message body has been sent */
-func (e *ExtMilter) Body(m *Modifier) (Response, error) {
+func (e *TestMilter) Body(m *Modifier) (Response, error) {
 	// prepare buffer
 	_ = bytes.NewReader(e.message.Bytes())
 
@@ -103,7 +103,7 @@ func (e *ExtMilter) Body(m *Modifier) (Response, error) {
 func myRunServer(socket net.Listener) {
 	// declare milter init function
 	init := func() (Milter, OptAction, OptProtocol) {
-		return &ExtMilter{},
+		return &TestMilter{},
 			OptAddHeader | OptChangeHeader | OptChangeFrom | OptAddRcpt | OptRemoveRcpt | OptChangeBody,
 			OptNoRcptTo
 	}

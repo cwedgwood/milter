@@ -16,3 +16,5 @@ and also _test cases using my [milterclient](https://github.com/mschneider82/mil
 * Init() is called on begin of a new Mail, before Connect() and before MailFrom() and also on RSET (abort command), so you can cleanup and init.
 * Init now has a sessionID and a mailID
 * Disconnect() which is called when the client disconnects (if you have a concurrent session counter you can decrease the counter there, this was not possible before)
+* Logger interface to inject a custom logger
+* Errors exported
