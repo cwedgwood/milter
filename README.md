@@ -18,3 +18,4 @@ and also _test cases using my [milterclient](https://github.com/mschneider82/mil
 * Disconnect() which is called when the client disconnects (if you have a concurrent session counter you can decrease the counter there, this was not possible before)
 * Logger interface to inject a custom logger
 * Errors exported
+* Changed: EnvFrom and RcptTo addresses are now always converted to lowercase
