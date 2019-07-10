@@ -23,22 +23,42 @@ type OptProtocol uint32
 
 const (
 	// set which actions the milter wants to perform
-	OptAddHeader    OptAction = 0x01
-	OptChangeBody   OptAction = 0x02
-	OptAddRcpt      OptAction = 0x04
-	OptRemoveRcpt   OptAction = 0x08
-	OptChangeHeader OptAction = 0x10
-	OptQuarantine   OptAction = 0x20
-	OptChangeFrom   OptAction = 0x40
+	OptNone           OptAction = 0x00  /* SMFIF_NONE no flags */
+	OptAddHeader      OptAction = 0x01  /* SMFIF_ADDHDRS filter may add headers */
+	OptChangeBody     OptAction = 0x02  /* SMFIF_CHGBODY filter may replace body */
+	OptAddRcpt        OptAction = 0x04  /* SMFIF_ADDRCPT filter may add recipients */
+	OptRemoveRcpt     OptAction = 0x08  /* SMFIF_DELRCPT filter may delete recipients */
+	OptChangeHeader   OptAction = 0x10  /* SMFIF_CHGHDRS filter may change/delete headers */
+	OptQuarantine     OptAction = 0x20  /* SMFIF_QUARANTINE filter may quarantine envelope */
+	OptChangeFrom     OptAction = 0x40  /* SMFIF_CHGFROM filter may change "from" (envelope sender) */
+	OptAddRcptPartial OptAction = 0x80  /* SMFIF_ADDRCPT_PAR filter may add recipients, including ESMTP parameter to the envelope.*/
+	OptSetSymList     OptAction = 0x100 /* SMFIF_SETSYMLIST filter can send set of symbols (macros) that it wants */
+	OptAllActions     OptAction = OptAddHeader | OptChangeBody | OptAddRcpt | OptRemoveRcpt | OptChangeHeader | OptQuarantine | OptChangeFrom | OptAddRcptPartial | OptSetSymList
 
 	// mask out unwanted parts of the SMTP transaction
-	OptNoConnect  OptProtocol = 0x01
-	OptNoHelo     OptProtocol = 0x02
-	OptNoMailFrom OptProtocol = 0x04
-	OptNoRcptTo   OptProtocol = 0x08
-	OptNoBody     OptProtocol = 0x10
-	OptNoHeaders  OptProtocol = 0x20
-	OptNoEOH      OptProtocol = 0x40
+	OptNoConnect    OptProtocol = 0x01       /* SMFIP_NOCONNECT MTA should not send connect info */
+	OptNoHelo       OptProtocol = 0x02       /* SMFIP_NOHELO MTA should not send HELO info */
+	OptNoMailFrom   OptProtocol = 0x04       /* SMFIP_NOMAIL MTA should not send MAIL info */
+	OptNoRcptTo     OptProtocol = 0x08       /* SMFIP_NORCPT MTA should not send RCPT info */
+	OptNoBody       OptProtocol = 0x10       /* SMFIP_NOBODY MTA should not send body (chunk) */
+	OptNoHeaders    OptProtocol = 0x20       /* SMFIP_NOHDRS MTA should not send headers */
+	OptNoEOH        OptProtocol = 0x40       /* SMFIP_NOEOH MTA should not send EOH */
+	OptNrHdr        OptProtocol = 0x80       /* SMFIP_NR_HDR SMFIP_NOHREPL No reply for headers */
+	OptNoUnknown    OptProtocol = 0x100      /* SMFIP_NOUNKNOWN MTA should not send unknown commands */
+	OptNoData       OptProtocol = 0x200      /* SMFIP_NODATA MTA should not send DATA */
+	OptSkip         OptProtocol = 0x400      /* SMFIP_SKIP MTA understands SMFIS_SKIP */
+	OptRcptRej      OptProtocol = 0x800      /* SMFIP_RCPT_REJ MTA should also send rejected RCPTs */
+	OptNrConn       OptProtocol = 0x1000     /* SMFIP_NR_CONN No reply for connect */
+	OptNrHelo       OptProtocol = 0x2000     /* SMFIP_NR_HELO No reply for HELO */
+	OptNrMailFrom   OptProtocol = 0x4000     /* SMFIP_NR_MAIL No reply for MAIL */
+	OptNrRcptTo     OptProtocol = 0x8000     /* SMFIP_NR_RCPT No reply for RCPT */
+	OptNrData       OptProtocol = 0x10000    /* SMFIP_NR_DATA No reply for DATA */
+	OptNrUnknown    OptProtocol = 0x20000    /* SMFIP_NR_UNKN No reply for UNKNOWN */
+	OptNrEOH        OptProtocol = 0x40000    /* SMFIP_NR_EOH No reply for eoh */
+	OptNrBody       OptProtocol = 0x80000    /* SMFIP_NR_BODY No reply for body chunk */
+	OptHdrLeadSpace OptProtocol = 0x100000   /* SMFIP_HDR_LEADSPC header value leading space */
+	OptMDS256K      OptProtocol = 0x10000000 /* SMFIP_MDS_256K MILTER_MAX_DATA_SIZE=256K */
+	OptMDS1M        OptProtocol = 0x20000000 /* SMFIP_MDS_1M MILTER_MAX_DATA_SIZE=1M */
 )
 
 // milterSession keeps session state during MTA communication

@@ -19,3 +19,4 @@ and also _test cases using my [milterclient](https://github.com/mschneider82/mil
 * Logger interface to inject a custom logger
 * Errors exported
 * Changed: EnvFrom and RcptTo addresses are now always converted to lowercase
+* Added all Protocol Options and Actions from libmilter (session.go)
