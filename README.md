@@ -1,10 +1,20 @@
 [![GoDoc](https://godoc.org/github.com/cwedgwood/milter?status.svg)](https://godoc.org/github.com/cwedgwood/milter)
 
-This is a fork of github.com/mschneider82/milter, which is an
-excellent fork of github.com/phalaaxx/milter.
+This is an incompatible fork of
+https://github.com/mschneider82/milter, which is an excellent update
+to github.com/phalaaxx/milter.
+
+# API / Interface
+
+The present API is not guaranteed to be stable though any changes will
+be minimized.
+
+There were quite a few iterations as code using this evolved to get it
+to it's present state and now various projects depend on the interface
+not breaking.
 
 
-# Fork Specific Changes
+# Fork-Specific Changes
 
 * The interface has been altered from mschneider82's code such that
   it's now easier to determine the boundaries between messages.
