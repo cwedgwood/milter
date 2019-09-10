@@ -5,11 +5,9 @@ import (
 	"bytes"
 	"encoding/binary"
 	"io"
-	"math/rand"
 	"net"
 	"net/textproto"
 	"strings"
-	"time"
 )
 
 // OptAction sets which actions the milter wants to perform.
@@ -62,29 +60,13 @@ const (
 
 // milterSession keeps session state during MTA communication
 type milterSession struct {
-	actions   OptAction
-	protocol  OptProtocol
-	sock      io.ReadWriteCloser
-	headers   textproto.MIMEHeader
-	macros    map[string]string
-	milter    Milter
-	sessionID string
-	mailID    string
-	logger    Logger
-}
-
-func init() {
-	rand.Seed(time.Now().UnixNano())
-}
-
-// genRandomID generates an random ID. vocals are removed to prevent dirty words which could be negative in spam score
-func (c *milterSession) genRandomID(length int) string {
-	var letters = []rune("bcdfghjklmnpqrstvwxyzBCDFGHJKLMNPQRSTVWXYZ")
-	b := make([]rune, length)
-	for i := range b {
-		b[i] = letters[rand.Intn(len(letters))]
-	}
-	return string(b)
+	actions  OptAction
+	protocol OptProtocol
+	sock     io.ReadWriteCloser
+	headers  textproto.MIMEHeader
+	macros   map[string]string
+	milter   Milter
+	logger   Logger
 }
 
 // ReadPacket reads incoming milter packet
@@ -144,13 +126,14 @@ func (m *milterSession) Process(msg *Message) (Response, error) {
 	case 'A':
 		// abort current message and start over
 		m.headers = nil
-		m.macros = nil
+		// macros is valid across messages
+
 		// do not send response
 
 		// on SMFIC_ABORT
 		// Reset state to before SMFIC_MAIL and continue,
 		// unless connection is dropped by MTA
-		m.milter.Init(m.sessionID, m.mailID)
+		m.milter.Reset()
 
 		return nil, nil
 
@@ -192,8 +175,11 @@ func (m *milterSession) Process(msg *Message) (Response, error) {
 			newModifier(m))
 
 	case 'D':
-		// define macros
-		m.macros = make(map[string]string)
+		// define/update macros
+		if m.macros == nil {
+			m.macros = make(map[string]string)
+		}
+
 		// convert data to Go strings
 		data := decodeCStrings(msg.Data[1:])
 		if len(data) != 0 {
@@ -228,9 +214,7 @@ func (m *milterSession) Process(msg *Message) (Response, error) {
 		}
 
 	case 'M':
-		m.mailID = m.genRandomID(12)
-		// Call Init for a new Mail
-		m.milter.Init(m.sessionID, m.mailID)
+		m.milter.NewMessage()
 		// envelope from address
 		envfrom := readCString(msg.Data)
 		return m.milter.MailFrom(strings.ToLower(strings.Trim(envfrom, "<>")), newModifier(m))
@@ -277,12 +261,9 @@ func (m *milterSession) Process(msg *Message) (Response, error) {
 func (m *milterSession) HandleMilterCommands() {
 
 	defer m.sock.Close()
-	defer m.milter.Disconnect()
+	defer m.milter.EndSession()
 
-	m.sessionID = m.genRandomID(12)
-
-	// Call Init() for a new Session first
-	m.milter.Init(m.sessionID, m.mailID)
+	m.milter.NewSession(m.logger)
 
 	for {
 		// ReadPacket

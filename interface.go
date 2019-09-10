@@ -7,14 +7,18 @@ import (
 
 // Milter is an interface for milter callback handlers
 type Milter interface {
-	// Init is called on begin of a new Mail, before Connect() and before MailFrom()
-	// Can be used to Reset session state
-	// On MailFrom mailID is available
-	Init(sessionID, mailID string)
+	// Called when milter session is created
+	NewSession(logger Logger)
 
 	// Connect is called to provide SMTP connection data for incoming message
 	//   supress with NoConnect
 	Connect(host string, family string, port uint16, addr net.IP, m *Modifier) (Response, error)
+
+	// Called when we have a new message, can occur more than once per session
+	NewMessage()
+
+	// Called when we get RSET, usually an appopriate time to invaliate message-specific state
+	Reset()
 
 	// Helo is called to process any HELO/EHLO related filters
 	//   supress with NoHelo
@@ -44,6 +48,6 @@ type Milter interface {
 	//   all changes to message's content & attributes must be done here
 	Body(m *Modifier) (Response, error)
 
-	// Disconnect is called at the end of the message Handling loop
-	Disconnect()
+	// EndSession is called at the end of the message Handling loop
+	EndSession()
 }

@@ -15,19 +15,16 @@ import (
 
 /* TestMilter object */
 type TestMilter struct {
-	Milter
 	multipart bool
 	message   *bytes.Buffer
 }
 
-// https://github.com/mschneider82/milter/blob/master/interface.go
-func (e *TestMilter) Init(sid, mid string) {
-	return
-}
-
-func (e *TestMilter) Disconnect() {
-	return
-}
+// https://github.com/cwedgwood/milter/blob/master/interface.go
+func (e *TestMilter) NewSession(Logger)                        {}
+func (e *TestMilter) EndSession()                              {}
+func (e *TestMilter) NewMessage()                              {}
+func (e *TestMilter) Reset()                                   {}
+func (e *TestMilter) Helo(string, *Modifier) (Response, error) { return RespAccept, nil }
 
 func (e *TestMilter) Connect(name, value string, port uint16, ip net.IP, m *Modifier) (Response, error) {
 	return RespContinue, nil
